@@ -137,7 +137,7 @@ public class RoleUserAnalysis {
 	}
 	
 	
-	//finding Role of the User
+	//finding Role of the User and orphan group
 	private LinkedHashMap<String, List<String>> suggestedRole(LinkedHashMap<String, List<String>> rd, LinkedHashMap<String, List<String>> ua)
 	{
 		LinkedHashMap<String, List<String>> userRole = new LinkedHashMap<String, List<String>>();
@@ -146,7 +146,7 @@ public class RoleUserAnalysis {
 		for(String uakey: uakeys)								//loop for each Users Keys
 		{
 			String roleSuggest = "";							//for saving suggestied role after comparisions
-			List<String> orphan = new ArrayList<String>();									//for saving the orphan group
+			List<String> orphan = new ArrayList<String>();		//for saving the orphan group
 			List<String> uaList = ua.get(uakey);				//extracting UserAccess Group List
 			List<String> roleOrphan = new ArrayList<String>();
 			
@@ -157,27 +157,21 @@ public class RoleUserAnalysis {
 				List<String> tempOrphan = new ArrayList<String>();
 				List<String> matched = new ArrayList<String>();	//to check matched groups to calculate orphan
 				List<String> rdList = rd.get(rdkey);			//extracting RoleDefination Group List
-				if(uaList.containsAll(rdList))
-				{
-					roleSuggest = rdkey;						//if lists match exactly then save the role and break
-					break;
-				}
-				else										//logic to  calculate variable of comparision
-				{
-					for(String rdGroup : rdList)				//loop for traversing each group in Role Defination List
-					{					
-						if(uaList.contains(rdGroup))
-						{
-							matched.add(rdGroup);
-							comparisionfactor++;
-						}
-						else
-							comparisionfactor--;
+				
+				for(String rdGroup : rdList)				//loop for traversing each group in Role Defination List
+				{					
+					if(uaList.contains(rdGroup))
+					{
+						matched.add(rdGroup);
+						comparisionfactor++;
 					}
-					for(String uaGroup : uaList)
-						if(!matched.contains(uaGroup))
-							tempOrphan.add(uaGroup);
+					else
+						comparisionfactor--;
 				}
+				for(String uaGroup : uaList)
+					if(!matched.contains(uaGroup))
+						tempOrphan.add(uaGroup);
+
 				if(comparisionfactor > maxcomparisionfactor)
 				{
 					maxcomparisionfactor = comparisionfactor;
