@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.dev.XSSFSave;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,10 +24,33 @@ public class RoleUserAnalysis {
 		//Creating Object of class RoleUserAnalysis
 		RoleUserAnalysis rul = new RoleUserAnalysis();
 		
-		String roleDefinationUrl = "C:\\eclipse-workspace\\RoleUserAnalysis\\Role_Definitions.xlsx";
-		String userAccessUrl = "C:\\eclipse-workspace\\RoleUserAnalysis\\User_Access.xlsx";
-		String suggestedRoleUrl = "C:\\eclipse-workspace\\RoleUserAnalysis\\SuggestedRole.xlsx";
-		String orphanEntitlementsUrl = "C:\\eclipse-workspace\\RoleUserAnalysis\\OrphanEntitlements.xlsx";
+		//using properties file
+		Properties filename = new Properties();
+		try
+		{
+			filename.load(new FileInputStream("filename.properties")); 
+		}
+		catch(FileNotFoundException e)
+		{
+			e.printStackTrace();
+		}
+		catch(IOException e)
+		{
+			e.printStackTrace();
+		}
+		//fetching file url from properties file
+		String roleDefinationUrl = filename.getProperty("roleDefinationUrl");
+		String userAccessUrl = filename.getProperty("userAccessUrl");
+		String suggestedRoleUrl = filename.getProperty("suggestedRoleUrl");
+		String orphanEntitlementsUrl = filename.getProperty("orphanEntitlementsUrl");
+		
+		/*
+		//stroing all file Urls in String
+		String roleDefinationUrl = "Role_Definitions.xlsx";
+		String userAccessUrl = "User_Access.xlsx";
+		String suggestedRoleUrl = "SuggestedRole.xlsx";
+		String orphanEntitlementsUrl = "OrphanEntitlements.xlsx";
+		*/
 		
 		//calling and passing file URL to readxlsx(url) method
 		LinkedHashMap<String, List<String>> roleDefinations = rul.readxlsx(roleDefinationUrl);
@@ -40,16 +63,8 @@ public class RoleUserAnalysis {
 		
 		//calling toExcel to store Suggested Role and Orphan Group in Excel Sheet
 		rul.toExcel(userRole, suggestedRoleUrl, orphanEntitlementsUrl);
-		
-		//TEST -------------------Problem in Writing into Excel---------------------------
-		/*
-		LinkedHashMap<String, List<String>> sugrole = rul.readxlsx(suggestedRoleUrl);
-		LinkedHashMap<String, List<String>> orphan = rul.readxlsx(orphanEntitlementsUrl);
-		System.out.println(userRole);
-		System.out.println(sugrole);
-		System.out.println(orphan);
-		*/
-
+		System.out.println("Role suggestions saved in " + suggestedRoleUrl);
+		System.out.println("Orphan Entitlements saved in " + orphanEntitlementsUrl);
 	}
 	
 	//Converting excell file into Data structure using LinkedHashMap
@@ -181,8 +196,10 @@ public class RoleUserAnalysis {
 	private void toExcel(LinkedHashMap<String, List<String>> userRole, String suggestedRoleUrl, String orphanEntitlementsUrl)
 	{
 		//Creating Blank WorkBook
-		XSSFWorkbook wbSuggestedRole = new XSSFWorkbook();
-		XSSFWorkbook wbOrphanEntitlements = new XSSFWorkbook();
+		XSSFWorkbook wbSuggestedRole = null;
+		wbSuggestedRole = new XSSFWorkbook();
+		XSSFWorkbook wbOrphanEntitlements = null;
+		wbOrphanEntitlements = new XSSFWorkbook();
 		
 		//Creating Blank Sheet
 		XSSFSheet sheetSuggestedRole = wbSuggestedRole.createSheet("SuggestedRoleSheet");
@@ -258,6 +275,10 @@ public class RoleUserAnalysis {
 				wbOrphanEntitlements.write(out);
 				if(out != null)
 					out.close();
+				if(wbOrphanEntitlements != null)
+					wbOrphanEntitlements.close();
+				if(wbSuggestedRole != null)
+					wbSuggestedRole.close();
 			}
 			catch(FileNotFoundException e)
 			{
