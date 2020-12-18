@@ -146,7 +146,7 @@ public class RoleUserAnalysis {
 		for(String uakey: uakeys)								//loop for each Users Keys
 		{
 			String roleSuggest = "";							//for saving suggestied role after comparisions
-			String orphan = "";									//for saving the orphan group
+			List<String> orphan = new ArrayList<String>();									//for saving the orphan group
 			List<String> uaList = ua.get(uakey);				//extracting UserAccess Group List
 			List<String> roleOrphan = new ArrayList<String>();
 			
@@ -154,7 +154,7 @@ public class RoleUserAnalysis {
 			for(String rdkey : rdkeys)							//loop for each Role Defination Keys
 			{
 				int comparisionfactor=0;						//variable of comparision
-				String tempOrphan = "";
+				List<String> tempOrphan = new ArrayList<String>();
 				List<String> matched = new ArrayList<String>();	//to check matched groups to calculate orphan
 				List<String> rdList = rd.get(rdkey);			//extracting RoleDefination Group List
 				if(uaList.containsAll(rdList))
@@ -176,7 +176,7 @@ public class RoleUserAnalysis {
 					}
 					for(String uaGroup : uaList)
 						if(!matched.contains(uaGroup))
-							tempOrphan = uaGroup;
+							tempOrphan.add(uaGroup);
 				}
 				if(comparisionfactor > maxcomparisionfactor)
 				{
@@ -186,7 +186,7 @@ public class RoleUserAnalysis {
 				}
 			}
 			roleOrphan.add(roleSuggest);
-			roleOrphan.add(orphan);
+			roleOrphan.addAll(orphan);
 			userRole.put(uakey, roleOrphan);
 		}
 		return userRole;
@@ -220,13 +220,14 @@ public class RoleUserAnalysis {
         //Creating Cell for both excel sheets
         Cell cellSuggestedRole = rowSuggestedRole.createCell(cellId);
 		Cell cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
-		 
+		cellId++;
 		cellSuggestedRole.setCellValue("User");
 		cellrowOrphanEntitlements.setCellValue("User");
-		cellId++;
+		
+		cellSuggestedRole = rowSuggestedRole.createCell(cellId);
+		cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
 		cellSuggestedRole.setCellValue("Role");
 		cellrowOrphanEntitlements.setCellValue("Orphan");
-		
 		for (String key : keyId)
 		{
 			//Creating Row in Excel Sheet
@@ -250,13 +251,16 @@ public class RoleUserAnalysis {
         	 String str = roleOrphanList.get(0);
     		 cellSuggestedRole = rowSuggestedRole.createCell(cellId);
     		 cellSuggestedRole.setCellValue(str);
-
+    		 
     		 //setting 2nd cell into OrphanEntitlements excel sheet
-    		 str = roleOrphanList.get(1);
-        	 cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
-        	 cellrowOrphanEntitlements.setCellValue(str);
-        	 cellId++;
-	    }
+    		 for(int i=1; (i<roleOrphanList.size()); i++)
+    		 {
+	    		 str = roleOrphanList.get(i);
+	        	 cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
+	        	 cellrowOrphanEntitlements.setCellValue(str);
+	        	 cellId++;
+    		 }
+	      }
 		
 			//Writing the workbook in file system
 			File suggestedRole = new File(suggestedRoleUrl);
