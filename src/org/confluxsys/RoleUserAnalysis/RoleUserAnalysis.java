@@ -63,6 +63,7 @@ public class RoleUserAnalysis {
 		
 		//calling toExcel to store Suggested Role and Orphan Group in Excel Sheet
 		rul.toExcel(userRole, suggestedRoleUrl, orphanEntitlementsUrl);
+		
 		System.out.println("Role suggestions saved in " + suggestedRoleUrl);
 		System.out.println("Orphan Entitlements saved in " + orphanEntitlementsUrl);
 	}
@@ -149,36 +150,50 @@ public class RoleUserAnalysis {
 			List<String> orphan = new ArrayList<String>();		//for saving the orphan group
 			List<String> uaList = ua.get(uakey);				//extracting UserAccess Group List
 			List<String> roleOrphan = new ArrayList<String>();
+			List<String> tempOrphan = new ArrayList<String>();
 			
 			int maxcomparisionfactor = 0;						//for comparing rows match
+			boolean flag = false;
 			for(String rdkey : rdkeys)							//loop for each Role Defination Keys
 			{
 				int comparisionfactor=0;						//variable of comparision
-				List<String> tempOrphan = new ArrayList<String>();
+				tempOrphan.clear();
 				List<String> matched = new ArrayList<String>();	//to check matched groups to calculate orphan
 				List<String> rdList = rd.get(rdkey);			//extracting RoleDefination Group List
-				
-				for(String rdGroup : rdList)				//loop for traversing each group in Role Defination List
-				{					
-					if(uaList.contains(rdGroup))
-					{
-						matched.add(rdGroup);
-						comparisionfactor++;
-					}
-					else
-						comparisionfactor--;
+				if(uaList.containsAll(rdList))
+				{
+					roleSuggest = rdkey;						//if lists match exactly then save the role and break
+					for(String uaGroup : uaList)
+						if(!rdList.contains(uaGroup))
+							tempOrphan.add(uaGroup);
+					flag = true;
+					break;
 				}
-				for(String uaGroup : uaList)
-					if(!matched.contains(uaGroup))
-						tempOrphan.add(uaGroup);
-
-				if(comparisionfactor > maxcomparisionfactor)
+				else										//logic to  calculate variable of comparision
+				{
+					for(String rdGroup : rdList)				//loop for traversing each group in Role Defination List
+					{					
+						if(uaList.contains(rdGroup))
+						{
+							matched.add(rdGroup);
+							comparisionfactor++;
+						}
+						else
+							comparisionfactor--;
+					}
+					for(String uaGroup : uaList)
+						if(!matched.contains(uaGroup))
+							tempOrphan.add(uaGroup);
+				}
+				if(comparisionfactor >= maxcomparisionfactor)
 				{
 					maxcomparisionfactor = comparisionfactor;
 					roleSuggest = rdkey;
 					orphan = tempOrphan;
 				}
 			}
+			if(flag)
+				orphan = tempOrphan;
 			roleOrphan.add(roleSuggest);
 			roleOrphan.addAll(orphan);
 			userRole.put(uakey, roleOrphan);
