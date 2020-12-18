@@ -42,11 +42,13 @@ public class RoleUserAnalysis {
 		rul.toExcel(userRole, suggestedRoleUrl, orphanEntitlementsUrl);
 		
 		//TEST -------------------Problem in Writing into Excel---------------------------
+		/*
 		LinkedHashMap<String, List<String>> sugrole = rul.readxlsx(suggestedRoleUrl);
 		LinkedHashMap<String, List<String>> orphan = rul.readxlsx(orphanEntitlementsUrl);
 		System.out.println(userRole);
 		System.out.println(sugrole);
 		System.out.println(orphan);
+		*/
 
 	}
 	
@@ -192,39 +194,54 @@ public class RoleUserAnalysis {
 		Set<String> keyId = userRole.keySet();
 		int rowId = 0;
 		
+		//Defining Title Row for both excel sheets
+		rowSuggestedRole = sheetSuggestedRole.createRow(rowId);
+        rowOrphanEntitlements = sheetOrphanEntitlements.createRow(rowId);
+        rowId++;
+        int cellId = 0;											//defining cellId to track cells of Excel
+        
+        //Creating Cell for both excel sheets
+        Cell cellSuggestedRole = rowSuggestedRole.createCell(cellId);
+		Cell cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
+		 
+		cellSuggestedRole.setCellValue("User");
+		cellrowOrphanEntitlements.setCellValue("User");
+		cellId++;
+		cellSuggestedRole.setCellValue("Role");
+		cellrowOrphanEntitlements.setCellValue("Orphan");
+		
 		for (String key : keyId)
 		{
+			//Creating Row in Excel Sheet
 	         rowSuggestedRole = sheetSuggestedRole.createRow(rowId);
 	         rowOrphanEntitlements = sheetOrphanEntitlements.createRow(rowId);
 	         rowId++;
-	         List<String> roleOrphanList= userRole.get(key);
-	         int cellId = 0;
 	         
-	         for(int i=0; i<roleOrphanList.size(); i++)
-	         {
-	        	 String str = roleOrphanList.get(i);
-	        	 if(i==0)
-	        	 {
-	        		 Cell cellSuggestedRole = rowSuggestedRole.createCell(cellId);
-	        		 Cell cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
-	        		 cellSuggestedRole.setCellValue(key);
-	        		 cellrowOrphanEntitlements.setCellValue(key);
-	        	 }
-	        	 if(i==2)
-	        	 {
-	        		 Cell cellSuggestedRole = rowSuggestedRole.createCell(cellId);
-	        		 cellSuggestedRole.setCellValue(str);
-	        	 }
-	        	 if(i==1)
-	        	 {
-		        	 Cell cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
-		        	 cellrowOrphanEntitlements.setCellValue(str);
-	        	 }
-	        	 cellId++;
-	         }
+	         List<String> roleOrphanList= userRole.get(key);			//Extracting the List value for each key(user)
+	         cellId = 0;											//redefining cellId to 0 for each row
+	         
+	         //Creating Cell for both excel sheets
+	         cellSuggestedRole = rowSuggestedRole.createCell(cellId);
+    		 cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
+    		 cellId++;
+    		 
+    		//Setting first cell into both excel sheets
+    		 cellSuggestedRole.setCellValue(key);
+    		 cellrowOrphanEntitlements.setCellValue(key);
+    		 
+    		 //setting 2nd cell into SuggestedRole excel sheet
+        	 String str = roleOrphanList.get(0);
+    		 cellSuggestedRole = rowSuggestedRole.createCell(cellId);
+    		 cellSuggestedRole.setCellValue(str);
+
+    		 //setting 2nd cell into OrphanEntitlements excel sheet
+    		 str = roleOrphanList.get(1);
+        	 cellrowOrphanEntitlements = rowOrphanEntitlements.createCell(cellId);
+        	 cellrowOrphanEntitlements.setCellValue(str);
+        	 cellId++;
 	    }
-		//Writing the workbook in file system
-	      
+		
+			//Writing the workbook in file system
 			File suggestedRole = new File(suggestedRoleUrl);
 			File orphanEntitlement = new File(orphanEntitlementsUrl);
 			FileOutputStream out = null;
